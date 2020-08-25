@@ -207,7 +207,10 @@ func SaltMinionRunRequestHandler(w http.ResponseWriter, req *http.Request) {
 			defer file.Close()
 			scanner := bufio.NewScanner(file)
 			for scanner.Scan() {
-				saltMinion.Roles = append(saltMinion.Roles, scanner.Text())
+				s := strings.TrimSpace(scanner.Text())
+				if len(s) > 0 {
+					saltMinion.Roles = append(saltMinion.Roles, s)
+				}
 			}
 		}
 
@@ -496,11 +499,11 @@ func isGrainsConfigNeeded(grainConfigLocation string) bool {
 func shouldAppendPrewarmedRoles(prewarmRoleLocation string) bool {
 	// Essentially a file exists check.
 	log.Println("[shouldAppendPrewarmedRoles] check whether prewarm roles exist, file location: " + prewarmRoleLocation)
-	b, err := os.Stat(prewarmRoleLocation)
+	_, err := os.Stat(prewarmRoleLocation)
 	if os.IsNotExist(err) {
 		return false
 	}
-	return !b.IsDir()
+	return true
 }
 
 func isSaltMinionRestartNeeded(servers []string) bool {
